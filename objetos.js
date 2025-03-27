@@ -1,7 +1,10 @@
 // objetos.js
-import {Objeto} from "./basicas.js";
-import {ScannerKao, CelulaK19, MascaraBiomecanica} from "./ferramentas.js";
+// Este arquivo define os objetos e documentos interativos do jogo, todos derivados da classe Objeto (definida em basicas.js).
 
+import { Objeto } from "./basicas.js";
+import { ScannerKao, CelulaK19, MascaraBiomecanica } from "./ferramentas.js";
+
+// TerminalDescontaminacao: Inicialmente contaminado; pode ser descontaminado usando o ScannerKao.
 export class TerminalDescontaminacao extends Objeto {
     constructor() {
         super(
@@ -10,16 +13,20 @@ export class TerminalDescontaminacao extends Objeto {
             "O terminal foi descontaminado e agora está ativo!"
         );
     }
-
+    // Se o jogador usar scanner_kao, o terminal é descontaminado.
+    // Caso contrário, exibe uma mensagem de erro.
     usa(ferramenta) {
         if (ferramenta instanceof ScannerKao) {
             this.acaoOk = true;
             return true;
+        } else {
+            console.log("Ferramenta incorreta. Use scanner_kao para descontaminar o terminal.");
+            return false;
         }
-        return false;
     }
 }
 
+// TerminalAnalise: Usado para energizar terminais; com o uso de celula_k19, gera a mascara_biomecanica.
 export class TerminalAnalise extends Objeto {
     constructor() {
         super(
@@ -28,16 +35,20 @@ export class TerminalAnalise extends Objeto {
             "O terminal foi energizado e gerou a mascara_biomecanica!"
         );
     }
-
+    // Se o jogador usar celula_k19, o terminal é energizado.
+    // Caso contrário, exibe uma mensagem de erro.
     usa(ferramenta) {
         if (ferramenta instanceof CelulaK19) {
             this.acaoOk = true;
             return true;
+        } else {
+            console.log("Ferramenta incorreta. Utilize celula_k19 para energizar o terminal.");
+            return false;
         }
-        return false;
     }
 }
 
+// PainelKairol: Exige autenticação biométrica; ao ser ativado com a mascara_biomecanica, libera o chip_kamen.
 export class PainelKairol extends Objeto {
     constructor() {
         super(
@@ -46,17 +57,20 @@ export class PainelKairol extends Objeto {
             "O painel foi autenticado e liberou o chip_kamen!"
         );
     }
-
+    // Se o jogador usar a mascara_biomecanica, o painel autentica com sucesso.
+    // Caso contrário, exibe uma mensagem de erro.
     usa(ferramenta) {
         if (ferramenta instanceof MascaraBiomecanica) {
             this.acaoOk = true;
             return true;
+        } else {
+            console.log("Autenticação falhou. Use a mascara_biomecanica para ativar o painel.");
+            return false;
         }
-        return false;
     }
 }
 
-// Documentos
+// DocumentoLDN: Fornece instruções para usar o scanner_kao.
 export class DocumentoLDN extends Objeto {
     constructor() {
         super(
@@ -65,7 +79,7 @@ export class DocumentoLDN extends Objeto {
             "Você já leu o documento_ldn."
         );
     }
-
+    // Ao ser "usado", exibe a mensagem e marca o documento como lido.
     usa(ferramenta) {
         console.log("Documento LDN: 'Use scanner_kao para descontaminar terminais contaminados.'");
         this.acaoOk = true;
@@ -73,6 +87,7 @@ export class DocumentoLDN extends Objeto {
     }
 }
 
+// RelatorioPRST: Fornece instruções para descontaminar o terminal.
 export class RelatorioPRST extends Objeto {
     constructor() {
         super(
@@ -81,7 +96,7 @@ export class RelatorioPRST extends Objeto {
             "Você já leu o relatorio_prst."
         );
     }
-
+    // Ao ser "usado", exibe a mensagem e marca o relatório como lido.
     usa(ferramenta) {
         console.log("RelatorioPRST: 'Sincronize o scanner_kao no terminal_descontaminacao para remover contaminação.'");
         this.acaoOk = true;
@@ -89,6 +104,7 @@ export class RelatorioPRST extends Objeto {
     }
 }
 
+// DocumentoPHSH: Fornece instruções para usar o celula_k19 no terminal de análise.
 export class DocumentoPHSH extends Objeto {
     constructor() {
         super(
@@ -97,7 +113,7 @@ export class DocumentoPHSH extends Objeto {
             "Você já leu o documento_phsh."
         );
     }
-
+    // Exibe a mensagem e marca o documento como lido.
     usa(ferramenta) {
         console.log("DocumentoPHSH: 'Use celula_k19 no terminal_analise para criar a mascara_biomecanica.'");
         this.acaoOk = true;
@@ -105,6 +121,7 @@ export class DocumentoPHSH extends Objeto {
     }
 }
 
+// RelatorioA28: Fornece instruções para usar a mascara_biomecanica no painel.
 export class RelatorioA28 extends Objeto {
     constructor() {
         super(
@@ -113,7 +130,7 @@ export class RelatorioA28 extends Objeto {
             "Você já leu o relatorio_a28."
         );
     }
-
+    // Exibe a mensagem e marca o relatório como lido.
     usa(ferramenta) {
         console.log("RelatorioA28: 'A mascara_biomecanica é necessária para ativar o painel_kairol e obter o chip_kamen.'");
         this.acaoOk = true;

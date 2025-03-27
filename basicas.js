@@ -2,36 +2,42 @@
 import promptsync from "prompt-sync";
 
 // -------------------------
-// Ferramenta
+// Classe Ferramenta
+// Representa uma ferramenta básica usada no jogo.
 export class Ferramenta {
-    #nome;
+    #nome; // Nome da ferramenta (campo privado)
 
     constructor(nome) {
         this.#nome = nome;
     }
 
+    // Retorna o nome da ferramenta
     get nome() {
         return this.#nome;
     }
 
+    // Método usar: retorna true por padrão. Deve ser sobrescrito em subclasses quando necessário.
     usar() {
         return true;
     }
 
+    // Retorna informações da ferramenta (usado no inventário)
     info() {
         return this.#nome;
     }
 }
 
 // -------------------------
-// Mochila
+// Classe Mochila
+// Gerencia as ferramentas coletadas pelo jogador.
 export class Mochila {
-    #ferramentas;
+    #ferramentas; // Array privado para armazenar as ferramentas
 
     constructor() {
         this.#ferramentas = [];
     }
 
+    // Adiciona uma ferramenta à mochila
     guarda(ferramenta) {
         if (!(ferramenta instanceof Ferramenta)) {
             throw new Error("Não é uma Ferramenta válida");
@@ -39,14 +45,17 @@ export class Mochila {
         this.#ferramentas.push(ferramenta);
     }
 
+    // Retorna a ferramenta com o nome especificado
     pega(nomeFerramenta) {
         return this.#ferramentas.find(f => f.nome === nomeFerramenta);
     }
 
+    // Verifica se a ferramenta com o nome especificado existe na mochila
     tem(nomeFerramenta) {
         return this.#ferramentas.some(f => f.nome === nomeFerramenta);
     }
 
+    // Retorna uma string com informações de todas as ferramentas da mochila
     inventario() {
         return this.#ferramentas
             .map(f => (typeof f.info === "function" ? f.info() : f.nome))
@@ -55,12 +64,13 @@ export class Mochila {
 }
 
 // -------------------------
-// Objeto
+// Classe Objeto
+// Representa um objeto ou documento interativo do jogo.
 export class Objeto {
-    #nome;
-    #descricaoAntesAcao;
-    #descricaoDepoisAcao;
-    #acaoOk;
+    #nome;                 // Nome do objeto
+    #descricaoAntesAcao;   // Descrição antes de interagir com o objeto
+    #descricaoDepoisAcao;  // Descrição após a interação
+    #acaoOk;               // Indica se a ação esperada já ocorreu (true ou false)
 
     constructor(nome, descAntes, descDepois) {
         this.#nome = nome;
@@ -69,38 +79,39 @@ export class Objeto {
         this.#acaoOk = false;
     }
 
+    // Retorna o nome do objeto
     get nome() {
         return this.#nome;
     }
 
+    // Getter e setter para o estado da ação
     get acaoOk() {
         return this.#acaoOk;
     }
-
     set acaoOk(val) {
         this.#acaoOk = val;
     }
 
+    // Retorna a descrição atual do objeto, de acordo com o estado da ação
     get descricao() {
-        if (!this.#acaoOk) {
-            return this.#descricaoAntesAcao;
-        }
-        return this.#descricaoDepoisAcao;
+        return !this.#acaoOk ? this.#descricaoAntesAcao : this.#descricaoDepoisAcao;
     }
 
+    // Método usar padrão; deve ser sobrescrito em subclasses para definir interações específicas
     usa(ferramenta, objeto) {
         return false;
     }
 }
 
 // -------------------------
-// Sala
+// Classe Sala
+// Representa um ambiente do jogo com objetos, ferramentas e portas para outras salas.
 export class Sala {
-    #nome;
-    #objetos;
-    #ferramentas;
-    #portas;
-    #engine;
+    #nome;         // Nome da sala
+    #objetos;      // Map de objetos presentes na sala
+    #ferramentas;  // Map de ferramentas presentes na sala
+    #portas;       // Map de portas (conexões para outras salas)
+    #engine;       // Referência à engine do jogo
 
     constructor(nome, engine) {
         this.#nome = nome;
@@ -110,43 +121,45 @@ export class Sala {
         this.#engine = engine;
     }
 
+    // Retorna o nome da sala
     get nome() {
         return this.#nome;
     }
 
+    // Getters para objetos, ferramentas e portas
     get objetos() {
         return this.#objetos;
     }
-
     get ferramentas() {
         return this.#ferramentas;
     }
-
     get portas() {
         return this.#portas;
     }
-
     get engine() {
         return this.#engine;
     }
 
+    // Retorna uma lista de objetos disponíveis (com nome e descrição)
     objetosDisponiveis() {
         let arr = [...this.#objetos.values()];
         return arr.map(o => o.nome + ":" + o.descricao);
     }
 
+    // Retorna uma lista dos nomes das ferramentas disponíveis
     ferramentasDisponiveis() {
         let arr = [...this.#ferramentas.values()];
         return arr.map(f => f.nome);
     }
 
+    // Retorna uma lista ordenada dos nomes das salas conectadas (portas)
     portasDisponiveis() {
         let arr = [...this.#portas.values()];
-        // Ordena alfabeticamente
         arr.sort((a, b) => a.nome.localeCompare(b.nome));
         return arr.map(s => s.nome);
     }
 
+    // Permite que o jogador pegue uma ferramenta presente na sala e a guarde na mochila
     pega(nomeFerramenta) {
         let ferr = this.#ferramentas.get(nomeFerramenta);
         if (ferr) {
@@ -157,11 +170,12 @@ export class Sala {
         return false;
     }
 
+    // Retorna a sala conectada cujo nome foi especificado
     sai(nomeSala) {
-        // Retorna a sala (objeto) que corresponde a esse nome
         return this.#portas.get(nomeSala);
     }
 
+    // Retorna uma string com a descrição completa da sala (incluindo objetos, ferramentas e portas)
     textoDescricao() {
         let desc = "Você está no " + this.#nome + "\n";
 
@@ -189,57 +203,66 @@ export class Sala {
         return desc;
     }
 
+    // Método para usar uma ferramenta em um objeto (padrão; pode ser sobrescrito nas subclasses)
     usa(ferramenta, objeto) {
         return false;
     }
 
+    // Método para "ler" um objeto (por exemplo, um documento)
     ler(nomeObj) {
         if (!this.#objetos.has(nomeObj)) return false;
         let obj = this.#objetos.get(nomeObj);
-        obj.usa(null);
+        obj.usa(null); // Simula a leitura, que pode alterar o estado do objeto
         return true;
     }
 }
 
 // -------------------------
-// Engine
+// Classe Engine
+// Responsável por gerenciar o jogo: controle de salas, inventário e o loop principal de comandos.
 export class Engine {
-    #mochila;
-    #salaCorrente;
-    #salaAnterior;
-    #fim;
+    #mochila;        // Mochila do jogador
+    #salaCorrente;   // Sala atual do jogador
+    #salaAnterior;   // Sala anterior (para o comando "voltar")
+    #fim;            // Flag que indica o fim do jogo
 
     constructor() {
         this.#mochila = new Mochila();
         this.#salaCorrente = null;
         this.#salaAnterior = null;
         this.#fim = false;
+        // A subclasse chamará criaCenario() no seu constructor após o super()
     }
 
+    // Retorna a mochila
     get mochila() {
         return this.#mochila;
     }
 
+    // Retorna a sala atual
     get salaCorrente() {
         return this.#salaCorrente;
     }
 
+    // Define a sala atual e atualiza a salaAnterior
     set salaCorrente(sala) {
-        // Não imprime nada aqui, para evitar duplicação
         if (this.#salaCorrente) {
             this.#salaAnterior = this.#salaCorrente;
         }
         this.#salaCorrente = sala;
     }
 
+    // Indica que o jogo terminou
     indicaFimDeJogo() {
         this.#fim = true;
     }
 
+    // Método a ser sobrescrito pela subclasse para criar o cenário do jogo
     criaCenario() {
         // Subclasse define
     }
 
+    // Exibe os comandos disponíveis para o jogador
     mostraAjuda() {
         console.log(`
 Comandos disponíveis:
@@ -255,8 +278,9 @@ Comandos disponíveis:
 `);
     }
 
+    // Loop principal do jogo: lê comandos do jogador e executa as ações correspondentes
     joga() {
-        const prompt = promptsync({sigint: true});
+        const prompt = promptsync({ sigint: true });
 
         while (!this.#fim) {
             let acao = prompt("O que voce deseja fazer? ");
@@ -314,6 +338,8 @@ Comandos disponíveis:
                     }
                     break;
 
+                // Comandos "entra" e "sai" para mudar de sala; ambos usam a mesma lógica:
+                // O jogador digita o nome da sala para a qual deseja ir.
                 case "entra":
                 case "sai":
                     if (!this.#salaCorrente) {
